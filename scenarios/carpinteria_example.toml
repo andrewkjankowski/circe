@@ -1,0 +1,43 @@
+# Carpinteria — 2BR beach-neighborhood cottage inside the STR-permitted zone
+# The realistic Santa Barbara-area path while the City of SB ordinance is in flux.
+name = "Carpinteria 2BR Beach Zone"
+market = "Santa Barbara Area"
+notes = "Confirm parcel is in the STR-permitted beach zone and a permit is available"
+
+[purchase]
+purchase_price = 1_700_000
+land_pct = 0.55
+closing_costs_pct = 0.02
+furnishing_budget = 45_000
+cost_seg_study_cost = 5_000
+
+[financing]
+down_payment_pct = 0.25
+interest_rate = 0.0700
+loan_term_years = 30
+
+[revenue]
+adr = 500
+occupancy = 0.60
+avg_stay_nights = 3.5
+revenue_ramp_year1 = 0.75
+
+[expenses]
+platform_fee_pct = 0.03
+mgmt_fee_pct = 0.0
+cleaning_net_cost_per_turn = 40
+property_tax_rate = 0.0105
+insurance_annual = 7_500
+utilities_annual = 9_000
+maintenance_pct_of_rents = 0.05
+supplies_annual = 3_600
+hoa_annual = 0
+permits_licenses_annual = 1_500
+
+[tax]
+federal_marginal_rate = 0.37
+ca_marginal_rate = 0.103
+cost_seg_reclass_pct = 0.28
+months_in_service_year1 = 6
+personal_use_days = 14
+filing_status_mfj = true
