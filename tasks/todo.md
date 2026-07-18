@@ -12,9 +12,17 @@
       (intentional fail: 7-night minimum).
 - [x] `QUESTIONS.md` — open questions for the owners.
 
-## Phase 1 — Calibrate (blocked on answers to QUESTIONS.md)
-- [ ] Set real tax profile (marginal rates, income level vs §461(l) cap).
-- [ ] Set real budget/financing terms (quote from lender).
+## Phase 1 — Calibrate (in progress; stepping through QUESTIONS.md one at a time)
+- [x] Set goal: after-tax break-even every year, slight loss OK
+      (`stabilized_loss_tolerance` = $12k/yr default — owner to confirm).
+- [x] Financing baseline: trust line >$1M at prime+1% (7.75%), interest-only,
+      funds cash-to-close; investment mortgage ~7%/30yr for the rest.
+- [x] Cheaper-property preference confirmed; added $1.2M condo scenario showing the
+      §461(l) thesis (nearly identical Y1 tax savings at half the price).
+- [x] Explained why Airbnb listings still appear in Monterey (legacy licenses,
+      homestays, commercial zones, 3x/yr LVRs, scofflaws) — see docs/regulations.md.
+- [ ] Set real tax profile (marginal rates, income level vs §461(l) cap). ← ASKED
+- [ ] Confirm trust line mechanics (draw size, interest-only vs amortizing).
 - [ ] Decide market scope (likely: drop Monterey for STR purposes).
 - [ ] Replace placeholder ADR/occupancy with AirDNA/Rabbu comps per zip.
 - [ ] Get insurance quotes for representative coastal properties.

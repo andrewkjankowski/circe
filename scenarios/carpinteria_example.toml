@@ -15,6 +15,9 @@ cost_seg_study_cost = 5_000
 down_payment_pct = 0.25
 interest_rate = 0.0700
 loan_term_years = 30
+# Trust line (borrow against trust assets) funds cash-to-close, interest-only
+trust_line_amount = 1_000_000    # capped at actual cash needed by the model
+trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
 
 [revenue]
 adr = 500

@@ -60,12 +60,30 @@ The analyzer reports, for each scenario:
 
 ## The core decision rule
 
-> A deal passes if: `pre-tax cashflow + tax savings ≥ 0` in Year 1 **and** stabilized
-> (Year 2+) after-tax cashflow is not deeply negative, **and** the parcel has a legal,
-> durable path to STR permitting.
+> A deal **passes** if: (1) the parcel has a legal, durable path to STR permitting,
+> (2) Year-1 after-tax cashflow (pre-tax cashflow + tax savings) ≥ 0, **and**
+> (3) stabilized (Year 2+) after-tax cashflow is break-even or a slight loss —
+> within the configurable `stabilized_loss_tolerance` (default $12k/yr, i.e. ~$1k/mo).
 
-Year-1 bonus depreciation is a one-time boost. Years 2+ must stand closer to their own
-feet, so the model shows both.
+Year-1 bonus depreciation is a one-time boost, so the every-year goal is governed by
+the stabilized number. Owner guidance: aim for break-even every year; a slight loss is
+acceptable; cheaper properties are preferred (the §461(l) cap means a ~$1.2M property
+captures nearly the same Year-1 tax savings as a $2.4M one).
+
+## Financing assumption
+
+Baseline financing stack per scenario:
+
+- Investment mortgage at ~7% / 30yr on 75% of price, plus
+- **Trust line of credit** (borrowing against trust assets, >$1M available) at
+  **prime + 1% = 7.75%** (WSJ prime 6.75%, July 2026), interest-only, funding the
+  down payment / closing / furnishing — so cash out of pocket is ~$0.
+
+Trust-line interest is deductible against the STR under interest-tracing rules since
+the proceeds fund the rental activity. Note the trade-off: 100% financing adds
+~$28–44k/yr of interest carry, which makes the stabilized every-year goal materially
+harder — the model shows this directly, and putting some cash equity in (or drawing
+less of the line) is the main lever to fix it.
 
 ## Disclaimer
 

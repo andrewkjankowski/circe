@@ -93,6 +93,15 @@ sees the bonus-depreciation boost. Don't double count.
   rental for part of the year or requires owner occupancy; renting it on Airbnb can
   breach the occupancy covenant. An **investment/DSCR loan** (20–25% down, higher rate)
   is the clean path. Decide before modeling — it changes the down payment and rate.
+- **Trust line of credit (our plan)**: borrowing against trust assets at prime + 1%
+  (7.75% at July 2026) to fund the down payment/closing/furnishing. Interest is
+  deductible against the STR under the **interest-tracing rules** (Reg. §1.163-8T) as
+  long as proceeds are traceably used for the rental — keep the draw in a separate
+  account and pay property costs directly from it. Risks: the rate floats with prime;
+  interest-only carry never amortizes; and pairing it with a 75% mortgage means 100%
+  financing, which adds ~$28–44k/yr of carry and makes annual break-even much harder.
+  A partial draw (or paying the line down from tax-refund proceeds in Year 2) is the
+  natural tuning knob.
 - **Repeat years**: the bonus boost is Year 1 only. Years 2+ produce modest depreciation.
   Some investors repeat the play with a new property every year or two; otherwise expect
   after-tax performance to converge to pre-tax performance.

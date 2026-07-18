@@ -43,6 +43,12 @@ class Scenario:
     down_payment_pct: float = 0.25
     interest_rate: float = 0.0675
     loan_term_years: int = 30
+    # Trust line of credit (borrow against trust assets). Interest-only, variable.
+    # Proceeds fund down payment / closing / furnishing, reducing cash out of pocket.
+    # Interest is deductible against the STR under interest-tracing rules (§163;
+    # Reg. 1.163-8T) since proceeds are used for the rental activity.
+    trust_line_amount: float = 0.0
+    trust_line_rate: float = 0.0775      # WSJ prime 6.75% (Jul 2026) + 1%
 
     # --- revenue ---
     adr: float = 500.0              # average daily rate, net of TOT (guest pays TOT)
@@ -72,6 +78,10 @@ class Scenario:
     personal_use_days: int = 14
     filing_status_mfj: bool = True
 
+    # --- goal ---
+    # "Break even every year if we can; a slight loss is acceptable."
+    stabilized_loss_tolerance: float = 12_000.0   # max acceptable after-tax loss, yr 2+
+
     notes: str = ""
 
     @classmethod
@@ -98,6 +108,7 @@ class Result:
     loan_amount: float = 0.0
     annual_debt_service: float = 0.0
     year1_interest: float = 0.0
+    trust_line_interest: float = 0.0
 
     gross_rents_stabilized: float = 0.0
     gross_rents_year1: float = 0.0
@@ -125,9 +136,16 @@ class Result:
     flags: list[str] = field(default_factory=list)
 
     @property
+    def hard_fail(self) -> bool:
+        return any(f.startswith("FAIL") for f in self.flags)
+
+    @property
     def passes(self) -> bool:
-        hard_fails = [f for f in self.flags if f.startswith("FAIL")]
-        return self.after_tax_cashflow_year1 >= 0 and not hard_fails
+        """Goal: break even after tax every year; slight stabilized loss OK."""
+        return (not self.hard_fail
+                and self.after_tax_cashflow_year1 >= 0
+                and self.after_tax_cashflow_stabilized
+                >= -self.scenario.stabilized_loss_tolerance)
 
 
 def monthly_payment(principal: float, annual_rate: float, years: int) -> float:
@@ -157,12 +175,17 @@ def analyze(s: Scenario) -> Result:
     # --- acquisition & financing ---
     down = s.purchase_price * s.down_payment_pct
     closing = s.purchase_price * s.closing_costs_pct
-    r.cash_to_close = down + closing + s.furnishing_budget + s.cost_seg_study_cost
+    total_cash_needed = down + closing + s.furnishing_budget + s.cost_seg_study_cost
+    trust_draw = min(s.trust_line_amount, total_cash_needed)
+    r.cash_to_close = total_cash_needed - trust_draw
     r.loan_amount = s.purchase_price - down
-    r.annual_debt_service = monthly_payment(r.loan_amount, s.interest_rate,
-                                            s.loan_term_years) * 12
-    r.year1_interest = first_year_interest(r.loan_amount, s.interest_rate,
-                                           s.loan_term_years)
+    r.trust_line_interest = trust_draw * s.trust_line_rate  # interest-only carry
+    r.annual_debt_service = (monthly_payment(r.loan_amount, s.interest_rate,
+                                             s.loan_term_years) * 12
+                             + r.trust_line_interest)
+    r.year1_interest = (first_year_interest(r.loan_amount, s.interest_rate,
+                                            s.loan_term_years)
+                        + r.trust_line_interest)
 
     # --- revenue ---
     occupied_nights = 365 * s.occupancy
@@ -279,8 +302,9 @@ def print_report(r: Result) -> None:
 ACQUISITION
   Purchase price                 {money(s.purchase_price):>14}
   Land allocation                {s.land_pct:>13.0%}   (improvement basis {money(r.improvement_basis)})
-  Cash to close (down+closing+furnish+study) {money(r.cash_to_close):>14}
-  Loan {money(r.loan_amount)} @ {s.interest_rate:.3%}, {s.loan_term_years}y -> debt service {money(r.annual_debt_service)}/yr
+  Trust line draw @ {s.trust_line_rate:.2%} (interest-only)   {money(min(s.trust_line_amount, s.purchase_price * (s.down_payment_pct + s.closing_costs_pct) + s.furnishing_budget + s.cost_seg_study_cost)):>14}
+  Cash to close after trust line draw          {money(r.cash_to_close):>14}
+  Mortgage {money(r.loan_amount)} @ {s.interest_rate:.3%}, {s.loan_term_years}y; total debt service {money(r.annual_debt_service)}/yr
 
 OPERATIONS                          Year 1        Stabilized
   Gross rents                 {money(r.gross_rents_year1):>14} {money(r.gross_rents_stabilized):>14}
@@ -299,9 +323,9 @@ YEAR-1 TAX (federal bonus depreciation)
   TOTAL YEAR-1 TAX SAVINGS                     {money(r.total_tax_savings_year1):>14}
 
 VERDICT
-  After-tax cashflow, Year 1        {money(r.after_tax_cashflow_year1):>14}   {'PASS: breaks even after tax' if r.after_tax_cashflow_year1 >= 0 else 'MISS: still negative after tax'}
-  After-tax cashflow, stabilized    {money(r.after_tax_cashflow_stabilized):>14}   (bonus boost is Year 1 only)
-  Tax savings as % of cash to close {r.total_tax_savings_year1 / r.cash_to_close:>13.1%}""")
+  After-tax cashflow, Year 1        {money(r.after_tax_cashflow_year1):>14}   {'meets Y1 break-even' if r.after_tax_cashflow_year1 >= 0 else 'misses Y1 break-even'}
+  After-tax cashflow, stabilized    {money(r.after_tax_cashflow_stabilized):>14}   {'within tolerance (-' + money(s.stabilized_loss_tolerance)[1:] + ')' if r.after_tax_cashflow_stabilized >= -s.stabilized_loss_tolerance else 'exceeds loss tolerance (-' + money(s.stabilized_loss_tolerance)[1:] + ')'}
+  Overall: {'PASS' if r.passes else ('FAIL (compliance)' if r.hard_fail else 'MISS (economics)')}""")
     if r.flags:
         print("\nFLAGS")
         for f in r.flags:
@@ -315,18 +339,18 @@ def print_comparison(results: list[Result]) -> None:
     print(f"{'Scenario':<28}{'Price':>12}{'Cash in':>12}{'PreTax CF Y1':>14}"
           f"{'Tax Save Y1':>13}{'AfterTax Y1':>13}{'AfterTax Y2+':>14}{'Verdict':>12}")
     print("-" * w)
-    for r in sorted(results, key=lambda x: -x.after_tax_cashflow_year1):
+    for r in sorted(results, key=lambda x: -x.after_tax_cashflow_stabilized):
         s = r.scenario
-        verdict = "PASS" if r.passes else ("FAIL" if any(
-            f.startswith("FAIL") for f in r.flags) else "MISS")
+        verdict = "PASS" if r.passes else ("FAIL" if r.hard_fail else "MISS")
         print(f"{s.name[:27]:<28}{money(s.purchase_price):>12}"
               f"{money(r.cash_to_close):>12}{money(r.pretax_cashflow_year1):>14}"
               f"{money(r.total_tax_savings_year1):>13}"
               f"{money(r.after_tax_cashflow_year1):>13}"
               f"{money(r.after_tax_cashflow_stabilized):>14}{verdict:>12}")
     print("=" * w)
-    print("PASS = after-tax break-even in Y1 with no hard compliance failures.")
-    print("MISS = compliant but still cashflow-negative after tax savings.")
+    print("PASS = Y1 after-tax break-even AND stabilized after-tax loss within")
+    print("       tolerance, with no compliance failures.")
+    print("MISS = compliant but misses the economic goal (see per-scenario detail).")
     print("FAIL = a strategy requirement is violated (see per-scenario flags).")
 
 

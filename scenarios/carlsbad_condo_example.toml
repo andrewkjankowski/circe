@@ -1,0 +1,49 @@
+# Carlsbad Village — 2BR condo inside the Coastal Zone
+# Tests the "cheaper property is optimal" thesis: lower price, and condos carry a
+# much lower land allocation (35% here vs 50-58% for SFRs), so a larger share of
+# the price is depreciable — the §461(l) cap is no longer the binding constraint.
+# CAUTION: most condo HOAs prohibit STRs — CC&R review is the first diligence step.
+name = "Carlsbad Village 2BR Condo"
+market = "North County San Diego"
+notes = "Coastal Zone condo; HOA CC&Rs must allow STR — verify before anything else"
+
+[purchase]
+purchase_price = 1_200_000
+land_pct = 0.35              # condos: mostly building/common-area basis
+closing_costs_pct = 0.02
+furnishing_budget = 40_000
+cost_seg_study_cost = 4_000
+
+[financing]
+down_payment_pct = 0.25
+interest_rate = 0.0700
+loan_term_years = 30
+# Trust line (borrow against trust assets) funds cash-to-close, interest-only
+trust_line_amount = 1_000_000    # capped at actual cash needed by the model
+trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
+
+[revenue]
+adr = 400                    # 2BR walkable Village comp range ~$325-475
+occupancy = 0.65
+avg_stay_nights = 3.0
+revenue_ramp_year1 = 0.75
+
+[expenses]
+platform_fee_pct = 0.03
+mgmt_fee_pct = 0.0
+cleaning_net_cost_per_turn = 40
+property_tax_rate = 0.0110
+insurance_annual = 4_500     # HO-6 condo policy + STR rider
+utilities_annual = 7_200
+maintenance_pct_of_rents = 0.04
+supplies_annual = 3_000
+hoa_annual = 7_200
+permits_licenses_annual = 1_200
+
+[tax]
+federal_marginal_rate = 0.37
+ca_marginal_rate = 0.103
+cost_seg_reclass_pct = 0.28
+months_in_service_year1 = 6
+personal_use_days = 14
+filing_status_mfj = true

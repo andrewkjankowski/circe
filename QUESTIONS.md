@@ -4,6 +4,17 @@ Answers to these will materially change the analysis. Grouped by how much they m
 numbers. Where useful, the current model default is noted so you can just confirm or
 correct it.
 
+## Answered so far (July 2026)
+
+- **Goal (was Q7):** aim for after-tax break-even **every year**; a slight stabilized
+  loss is acceptable. Encoded as `stabilized_loss_tolerance` (default $12k/yr) in the
+  model — confirm or change that number.
+- **Price philosophy (was part of Q5):** cheaper is optimal — agreed, since the §461(l)
+  cap binds. Still need the actual budget ceiling.
+- **Financing (was Q6):** trust line of credit (>$1M available) at prime + 1% (7.75%
+  currently), assumed interest-only, funding cash-to-close; investment mortgage for the
+  rest. Encoded as `trust_line_amount` / `trust_line_rate` per scenario.
+
 ## A. Tax profile (drives the entire break-even math)
 
 1. **What is your combined marginal tax rate?** Federal bracket (model assumes 37%) and
@@ -20,15 +31,17 @@ correct it.
 
 ## B. Budget and financing
 
-5. **Purchase price range?** Examples assume $1.7–2.6M. What's the actual ceiling, and
-   how much cash are you comfortable deploying (down payment + ~$50–60k furnishing +
-   reserves)? Examples need ~$500–770k cash to close.
-6. **Financing type?** The clean path is an investment/DSCR loan (20–25% down, ~7%).
-   A "second home" loan is cheaper but its occupancy covenants usually conflict with STR
-   use. Any chance of paying cash or using a HELOC on the primary?
-7. **Reserves target?** Stabilized after-tax cashflow is still ‑$20–35k/yr in the example
-   scenarios. Are you comfortable funding that gap annually after Year 1, or should the
-   screen also require Year-2+ after-tax break-even (a much stricter filter)?
+5. **Purchase price ceiling?** Examples now span $1.2–2.6M. Given "cheaper is optimal,"
+   what's the realistic band — and is a condo acceptable, or single-family only?
+   (Condos have much lower land allocations, which helps the tax math, but most condo
+   HOAs prohibit STRs.)
+6. **Trust line details.** Is the prime+1% line interest-only or amortizing? Is there a
+   draw limit you want to respect (e.g., only fund the down payment, not 100% of cash
+   needs)? Full 100% financing adds ~$28–44k/yr of carry and currently pushes every
+   example past the $12k/yr stabilized-loss tolerance — putting ~$200–300k cash equity
+   in (or a smaller draw) is the main fix.
+7. **What counts as a "slight loss"?** Model default is $12k/yr (~$1k/mo) after tax.
+   Confirm or set your number.
 
 ## C. How you'll actually use and run the property
 

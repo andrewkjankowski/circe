@@ -32,6 +32,37 @@ out. Solana Beach conflicts with the 7-day test.
 | **City of Monterey** | **No** | <30-day rentals illegal; advertising ban | **Fails.** |
 | **Pacific Grove** | Mostly no | Measure M banned most residential STRs; small license pool in Coastal Zone with waitlist | **Fails for practical purposes.** |
 
+### "But I see Airbnb listings in Monterey/Pebble Beach — how?"
+
+Active listings do not mean the strategy is available to a new buyer. What you're
+seeing on the map is a mix of:
+
+1. **Licensed legacy operators.** The county's 2024/2025 ordinances let existing
+   operators keep running if they applied for a vacation-rental license in time.
+   Those licenses attach to the **operator and permit**, not the deed — they do not
+   transfer to a buyer. The Jan 2026 residential-zone ban is also still being turned
+   into ordinance language and is tangled in the *MCVRA v. County of Monterey*
+   lawsuit (the county has suspended enforcement of two challenged provisions), so
+   many incumbents keep operating during the limbo.
+2. **Hosted homestays.** Renting rooms while the owner is present is legal and
+   uncapped in the unincorporated county (e.g. the "Pebble Beach room with forest
+   views" listing — that's a room in someone's occupied house, not a whole-home STR).
+3. **Limited Vacation Rentals** — whole-home rentals allowed up to ~3 times per year
+   in the county. Fine for defraying costs; useless for a ~150-night STR business.
+4. **Commercial/hospitality zones.** Seaside, parts of the City of Monterey near
+   Cannery Row, and commercially-zoned parcels can host legal sub-30-day rentals
+   (the Seaside apartment listing in your screenshot is this bucket). Carmel's ban
+   is residential-zone only; its commercial district allows some units.
+5. **Non-compliant listings.** Enforcement is complaint- and scraper-driven
+   (Host Compliance contracts); illegal listings persist until cited.
+
+**None of these paths work for a new buyer running the tax strategy**: legacy
+licenses don't transfer, homestays require the owner present (and it's not our
+primary residence), 3x/year can't hit material-participation economics, and buying a
+commercially-zoned unit in Seaside is a different investment thesis than a Carmel
+second home. So the "grandfathered" listings are real, but the door behind them is
+shut.
+
 **Bottom line:** The Monterey Peninsula is effectively **closed** to this strategy. Only
 niche paths exist (commercial-zoned parcels, licensed homestays with owner present, or
 Limited Vacation Rentals ~3x/year in the county) and none support the tax play. If we
