@@ -81,11 +81,15 @@ class Scenario:
     interest_rate: float = 0.0675
     loan_term_years: int = 30
     # Trust line of credit (borrow against trust assets). Interest-only, variable.
-    # Proceeds fund down payment / closing / furnishing, reducing cash out of pocket.
+    # Used as a BRIDGE: it funds cash-to-close beyond our own cash, then the Year-1
+    # tax savings are swept against the balance, shrinking the Year-2+ carry.
     # Interest is deductible against the STR under interest-tracing rules (§163;
     # Reg. 1.163-8T) since proceeds are used for the rental activity.
+    # NOTE: interest-only + variable at prime+1% is an ASSUMPTION — actual line
+    # mechanics (amortization, rate reset) pending financial-advisor confirmation.
     trust_line_amount: float = 0.0
     trust_line_rate: float = 0.0775      # WSJ prime 6.75% (Jul 2026) + 1%
+    owner_cash_at_close: float = 50_000.0  # our own cash contributed at closing
 
     # --- revenue ---
     adr: float = 500.0              # average daily rate, net of TOT (guest pays TOT)
@@ -145,9 +149,12 @@ class Result:
     scenario: Scenario
     cash_to_close: float = 0.0
     loan_amount: float = 0.0
-    annual_debt_service: float = 0.0
+    trust_draw: float = 0.0
+    trust_paydown_year1: float = 0.0
+    trust_balance_stabilized: float = 0.0
+    debt_service_year1: float = 0.0
+    debt_service_stabilized: float = 0.0
     year1_interest: float = 0.0
-    trust_line_interest: float = 0.0
 
     gross_rents_stabilized: float = 0.0
     gross_rents_year1: float = 0.0
@@ -215,16 +222,17 @@ def analyze(s: Scenario) -> Result:
     down = s.purchase_price * s.down_payment_pct
     closing = s.purchase_price * s.closing_costs_pct
     total_cash_needed = down + closing + s.furnishing_budget + s.cost_seg_study_cost
-    trust_draw = min(s.trust_line_amount, total_cash_needed)
-    r.cash_to_close = total_cash_needed - trust_draw
+    r.trust_draw = min(s.trust_line_amount,
+                       max(total_cash_needed - s.owner_cash_at_close, 0.0))
+    r.cash_to_close = total_cash_needed - r.trust_draw
     r.loan_amount = s.purchase_price - down
-    r.trust_line_interest = trust_draw * s.trust_line_rate  # interest-only carry
-    r.annual_debt_service = (monthly_payment(r.loan_amount, s.interest_rate,
-                                             s.loan_term_years) * 12
-                             + r.trust_line_interest)
+    mortgage_payment_annual = monthly_payment(r.loan_amount, s.interest_rate,
+                                              s.loan_term_years) * 12
+    trust_interest_y1 = r.trust_draw * s.trust_line_rate  # interest-only carry
+    r.debt_service_year1 = mortgage_payment_annual + trust_interest_y1
     r.year1_interest = (first_year_interest(r.loan_amount, s.interest_rate,
                                             s.loan_term_years)
-                        + r.trust_line_interest)
+                        + trust_interest_y1)
 
     # --- revenue ---
     occupied_nights = 365 * s.occupancy
@@ -246,8 +254,7 @@ def analyze(s: Scenario) -> Result:
                                       turns_stabilized * s.revenue_ramp_year1)
     r.noi_stabilized = r.gross_rents_stabilized - r.operating_expenses_stabilized
     r.noi_year1 = r.gross_rents_year1 - r.operating_expenses_year1
-    r.pretax_cashflow_stabilized = r.noi_stabilized - r.annual_debt_service
-    r.pretax_cashflow_year1 = r.noi_year1 - r.annual_debt_service
+    r.pretax_cashflow_year1 = r.noi_year1 - r.debt_service_year1
 
     # --- depreciation ---
     basis = s.purchase_price + closing            # closing costs capitalize into basis
@@ -285,19 +292,6 @@ def analyze(s: Scenario) -> Result:
     r.ca_tax_savings_year1 = ca_tax(income) - ca_tax(income - ca_loss)
     r.total_tax_savings_year1 = r.federal_tax_savings_year1 + r.ca_tax_savings_year1
 
-    # --- stabilized (year 2+): federal bonus is gone (building SL only);
-    # CA keeps depreciating everything straight-line, so CA depreciation is larger.
-    # Year-1 interest approximates early-year interest.
-    fed_taxable_stab = (r.noi_stabilized - r.year1_interest
-                        - r.sl_depreciation_full_year)
-    ca_depr_stab = r.improvement_basis / s.building_recovery_years \
-        + s.furnishing_budget / 7
-    ca_taxable_stab = r.noi_stabilized - r.year1_interest - ca_depr_stab
-    # positive savings if taxable loss; negative (tax owed) if taxable income
-    r.tax_savings_stabilized = (
-        federal_tax(income) - federal_tax(income + fed_taxable_stab)
-        + ca_tax(income) - ca_tax(income + ca_taxable_stab))
-
     # --- compliance flags (hard fails suspend the loss -> no tax savings) ---
     if s.avg_stay_nights > 7:
         r.flags.append("FAIL: average stay > 7 nights — losses are passive "
@@ -307,17 +301,42 @@ def analyze(s: Scenario) -> Result:
     if s.personal_use_days > personal_cap:
         r.flags.append(f"FAIL: personal use {s.personal_use_days}d exceeds §280A cap "
                        f"({personal_cap:.0f}d) — losses disallowed; tax savings zeroed")
-    if any(f.startswith("FAIL") for f in r.flags):
+    hard_fail = any(f.startswith("FAIL") for f in r.flags)
+    if hard_fail:
         r.federal_tax_savings_year1 = 0.0
         r.ca_tax_savings_year1 = 0.0
         r.total_tax_savings_year1 = 0.0
+
+    # --- bridge paydown: sweep Year-1 tax savings against the trust line ---
+    r.trust_paydown_year1 = min(r.total_tax_savings_year1, r.trust_draw)
+    r.trust_balance_stabilized = r.trust_draw - r.trust_paydown_year1
+    trust_interest_stab = r.trust_balance_stabilized * s.trust_line_rate
+    r.debt_service_stabilized = mortgage_payment_annual + trust_interest_stab
+    r.pretax_cashflow_stabilized = r.noi_stabilized - r.debt_service_stabilized
+
+    # --- stabilized (year 2+): federal bonus is gone (building SL only);
+    # CA keeps depreciating everything straight-line, so CA depreciation is larger.
+    # Year-1 mortgage interest approximates early-year interest.
+    mortgage_interest_stab = first_year_interest(r.loan_amount, s.interest_rate,
+                                                 s.loan_term_years)
+    interest_stab = mortgage_interest_stab + trust_interest_stab
+    fed_taxable_stab = (r.noi_stabilized - interest_stab
+                        - r.sl_depreciation_full_year)
+    ca_depr_stab = r.improvement_basis / s.building_recovery_years \
+        + s.furnishing_budget / 7
+    ca_taxable_stab = r.noi_stabilized - interest_stab - ca_depr_stab
+    # positive savings if taxable loss; negative (tax owed) if taxable income
+    r.tax_savings_stabilized = (
+        federal_tax(income) - federal_tax(income + fed_taxable_stab)
+        + ca_tax(income) - ca_tax(income + ca_taxable_stab))
+
+    if hard_fail:
         r.tax_savings_stabilized = min(r.tax_savings_stabilized, 0.0)
 
     r.after_tax_cashflow_year1 = r.pretax_cashflow_year1 + r.total_tax_savings_year1
     r.after_tax_cashflow_stabilized = (r.pretax_cashflow_stabilized
                                        + r.tax_savings_stabilized)
 
-    hard_fail = any(f.startswith("FAIL") for f in r.flags)
     if r.ebl_carryforward > 0 and not hard_fail:
         r.flags.append(f"WARN: §461(l) excess business loss — "
                        f"${r.ebl_carryforward:,.0f} deferred to NOL carryforward")
@@ -349,15 +368,16 @@ def print_report(r: Result) -> None:
 ACQUISITION
   Purchase price                 {money(s.purchase_price):>14}
   Land allocation                {s.land_pct:>13.0%}   (improvement basis {money(r.improvement_basis)})
-  Trust line draw @ {s.trust_line_rate:.2%} (interest-only)   {money(min(s.trust_line_amount, s.purchase_price * (s.down_payment_pct + s.closing_costs_pct) + s.furnishing_budget + s.cost_seg_study_cost)):>14}
-  Cash to close after trust line draw          {money(r.cash_to_close):>14}
-  Mortgage {money(r.loan_amount)} @ {s.interest_rate:.3%}, {s.loan_term_years}y; total debt service {money(r.annual_debt_service)}/yr
+  Our cash at close                            {money(r.cash_to_close):>14}
+  Trust line draw @ {s.trust_line_rate:.2%} (interest-only bridge)  {money(r.trust_draw):>12}
+    swept with Y1 tax savings: -{money(r.trust_paydown_year1)} -> Y2+ balance {money(r.trust_balance_stabilized)}
+  Mortgage {money(r.loan_amount)} @ {s.interest_rate:.3%}, {s.loan_term_years}y
 
 OPERATIONS                          Year 1        Stabilized
   Gross rents                 {money(r.gross_rents_year1):>14} {money(r.gross_rents_stabilized):>14}
   Operating expenses          {money(-r.operating_expenses_year1):>14} {money(-r.operating_expenses_stabilized):>14}
   NOI                         {money(r.noi_year1):>14} {money(r.noi_stabilized):>14}
-  Debt service                {money(-r.annual_debt_service):>14} {money(-r.annual_debt_service):>14}
+  Debt service                {money(-r.debt_service_year1):>14} {money(-r.debt_service_stabilized):>14}
   PRE-TAX CASHFLOW            {money(r.pretax_cashflow_year1):>14} {money(r.pretax_cashflow_stabilized):>14}
 
 YEAR-1 TAX (vs household taxable income {money(s.household_taxable_income)}, MFJ brackets)

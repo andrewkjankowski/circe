@@ -20,8 +20,8 @@ trust_line_amount = 1_000_000    # capped at actual cash needed by the model
 trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
 
 [revenue]
-adr = 500
-occupancy = 0.60
+adr = 385                    # Rabbu Carpinteria 2BR ADR $383
+occupancy = 0.50
 avg_stay_nights = 3.5
 revenue_ramp_year1 = 0.75
 

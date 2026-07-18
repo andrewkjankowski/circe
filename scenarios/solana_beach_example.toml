@@ -23,7 +23,7 @@ trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
 
 [revenue]
 adr = 600
-occupancy = 0.55
+occupancy = 0.45
 avg_stay_nights = 7.5        # forced by ordinance -> fails the 7-day test
 revenue_ramp_year1 = 0.75
 

@@ -24,9 +24,15 @@
 - [x] Set real tax profile: ~$600k income MFJ CA, above §461(l) cap, bonus variation.
       Model upgraded to bracket-by-bracket savings (2026 fed + CA schedules);
       blended federal rate on a capped loss is ~28.7%, not 37%.
-- [ ] Confirm trust line mechanics (draw size, interest-only vs amortizing). ← ASKED
+- [x] Trust line usage: bridge (Y1 tax savings sweep the balance), $50k owner cash.
+      Mechanics (interest-only? rate reset?) pending financial advisor — model
+      assumes interest-only at prime + 1%.
+- [x] Replace placeholder ADR/occupancy with aggregated market data (AirDNA, AirROI,
+      Rabbu, StaySTRA, Airbtics) — see docs/market_data.md. Finding: with realistic
+      market-average comps, NO scenario meets the every-year goal; a ~$950k-$1.2M
+      property run at top-quartile ADR/occupancy is the passing envelope.
 - [ ] Decide market scope (likely: drop Monterey for STR purposes).
-- [ ] Replace placeholder ADR/occupancy with AirDNA/Rabbu comps per zip.
+- [ ] Address-level revenue comps for candidate properties (Phase 2).
 - [ ] Get insurance quotes for representative coastal properties.
 
 ## Phase 2 — Property pipeline

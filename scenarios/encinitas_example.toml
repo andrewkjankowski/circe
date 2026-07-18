@@ -20,8 +20,8 @@ trust_line_amount = 1_000_000    # capped at actual cash needed by the model
 trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
 
 [revenue]
-adr = 650                    # 3BR walkable-to-beach comp range ~$550-800
-occupancy = 0.62
+adr = 525                    # see docs/market_data.md: SD 3BR $539 mkt ADR, Encinitas $476-572
+occupancy = 0.55
 avg_stay_nights = 3.5
 revenue_ramp_year1 = 0.75
 

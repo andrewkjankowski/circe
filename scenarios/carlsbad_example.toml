@@ -20,8 +20,8 @@ trust_line_amount = 1_000_000    # capped at actual cash needed by the model
 trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
 
 [revenue]
-adr = 550
-occupancy = 0.62
+adr = 425                    # entire-home ADR $321-448 across sources; upper half
+occupancy = 0.58
 avg_stay_nights = 3.2
 revenue_ramp_year1 = 0.75
 

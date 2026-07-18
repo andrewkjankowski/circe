@@ -20,6 +20,16 @@ correct it.
   (`household_taxable_income`). Key consequence: the blended federal rate on a $317k
   loss is **~28.7%, not 37%** — see docs/strategy.md §7. Bonus-year timing noted as a
   planning lever.
+- **Trust line usage (was Q2/B6):** treated as a **bridge** — draw at close, sweep the
+  full Year-1 tax savings against the balance, carry the remainder interest-only at
+  prime + 1%. Owner cash at close: **~$50k**. Encoded as `owner_cash_at_close` +
+  automatic Y1-savings paydown in the model. **Open item for the financial advisor:**
+  confirm the line is interest-only with flexible repayment and how the rate resets
+  (the model assumes interest-only, variable at prime + 1%).
+- **Revenue inputs (was Q14, partially):** scenario ADR/occupancy now calibrated to
+  aggregated market data from AirDNA, AirROI, Rabbu, StaySTRA, and Airbtics — see
+  `docs/market_data.md`. Property-level comps (Rentalizer / address-level estimates)
+  remain a Phase-2 step once we have candidate addresses.
 
 ## A. Tax profile (drives the entire break-even math)
 
@@ -75,13 +85,13 @@ correct it.
     Commission into 2027). Buying there now carries regulatory-change risk both ways
     (grandfathering vs. tightening). What's your risk appetite for that?
 
-## E. Revenue assumptions (to replace my placeholders)
+## E. Revenue assumptions
 
-14. Do you have access to **AirDNA / Rabbu / PriceLabs comps** for the target zips, or
-    should we pull comp data another way? Model placeholders: ADR $500–650, 60–62%
-    occupancy, which are rough mid-range values, not researched comps.
+14. ~~Comp data?~~ **Answered (market level)** — see `docs/market_data.md`. Address-level
+    comps still needed in Phase 2.
 15. **Property profile:** bedrooms/sleeps target, pool/hot-tub, pet-friendly? These move
-    ADR 20–40% in these markets.
+    ADR 20–40% in these markets. The sensitivity sweep shows the deal only works with
+    top-quartile operations — property selection and amenities are how you get there.
 
 ## F. The Instagram reel
 
