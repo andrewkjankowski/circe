@@ -1,0 +1,46 @@
+# Encinitas / Leucadia — 3BR near Moonlight Beach, west of I-5 (Coastal Zone)
+# Strongest regulatory fit: non-hosted STRs legal with permit, 2-night minimum.
+name = "Encinitas 3BR Coastal"
+market = "North County San Diego"
+notes = "West of I-5, inside 4% coastal-zone cap; verify 200-ft separation rule"
+
+[purchase]
+purchase_price = 2_400_000
+land_pct = 0.55              # coastal Encinitas assessor ratios often 50-65%
+closing_costs_pct = 0.02
+furnishing_budget = 60_000
+cost_seg_study_cost = 5_000
+
+[financing]
+down_payment_pct = 0.25      # investment/DSCR loan (see docs/strategy.md on financing)
+interest_rate = 0.0700
+loan_term_years = 30
+# Trust line (borrow against trust assets) funds cash-to-close, interest-only
+trust_line_amount = 1_000_000    # capped at actual cash needed by the model
+trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
+
+[revenue]
+adr = 525                    # see docs/market_data.md: SD 3BR $539 mkt ADR, Encinitas $476-572
+occupancy = 0.55
+avg_stay_nights = 3.5
+revenue_ramp_year1 = 0.75
+
+[expenses]
+platform_fee_pct = 0.03
+mgmt_fee_pct = 0.0           # self-manage for material participation
+cleaning_net_cost_per_turn = 50   # cleaner cost above guest cleaning fee
+property_tax_rate = 0.0110
+insurance_annual = 9_000
+utilities_annual = 10_800
+maintenance_pct_of_rents = 0.05
+supplies_annual = 4_800
+hoa_annual = 0
+permits_licenses_annual = 1_500
+
+[tax]
+# ~$600k household income, MFJ, minus $32.2k standard deduction
+household_taxable_income = 568_000
+cost_seg_reclass_pct = 0.28
+months_in_service_year1 = 6
+personal_use_days = 14
+filing_status_mfj = true

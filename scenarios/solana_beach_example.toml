@@ -1,0 +1,48 @@
+# Solana Beach — 3BR near Fletcher Cove
+# INTENTIONAL FAIL CASE: the city mandates a 7-night minimum stay and one booking
+# per 7-day window, so average stay is >= 7 nights and the STR-loophole test breaks.
+# Kept in the repo to demonstrate the compliance screen.
+name = "Solana Beach 3BR (7-night min)"
+market = "North County San Diego"
+notes = "City-mandated 7-night minimum defeats the <=7-day average-stay test"
+
+[purchase]
+purchase_price = 2_600_000
+land_pct = 0.58
+closing_costs_pct = 0.02
+furnishing_budget = 60_000
+cost_seg_study_cost = 5_000
+
+[financing]
+down_payment_pct = 0.25
+interest_rate = 0.0700
+loan_term_years = 30
+# Trust line (borrow against trust assets) funds cash-to-close, interest-only
+trust_line_amount = 1_000_000    # capped at actual cash needed by the model
+trust_line_rate = 0.0775         # WSJ prime 6.75% (Jul 2026) + 1%
+
+[revenue]
+adr = 600
+occupancy = 0.45
+avg_stay_nights = 7.5        # forced by ordinance -> fails the 7-day test
+revenue_ramp_year1 = 0.75
+
+[expenses]
+platform_fee_pct = 0.03
+mgmt_fee_pct = 0.0
+cleaning_net_cost_per_turn = 50
+property_tax_rate = 0.0110
+insurance_annual = 9_500
+utilities_annual = 10_800
+maintenance_pct_of_rents = 0.05
+supplies_annual = 4_200
+hoa_annual = 0
+permits_licenses_annual = 1_200
+
+[tax]
+# ~$600k household income, MFJ, minus $32.2k standard deduction
+household_taxable_income = 568_000
+cost_seg_reclass_pct = 0.28
+months_in_service_year1 = 6
+personal_use_days = 14
+filing_status_mfj = true
