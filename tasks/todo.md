@@ -21,8 +21,10 @@
       §461(l) thesis (nearly identical Y1 tax savings at half the price).
 - [x] Explained why Airbnb listings still appear in Monterey (legacy licenses,
       homestays, commercial zones, 3x/yr LVRs, scofflaws) — see docs/regulations.md.
-- [ ] Set real tax profile (marginal rates, income level vs §461(l) cap). ← ASKED
-- [ ] Confirm trust line mechanics (draw size, interest-only vs amortizing).
+- [x] Set real tax profile: ~$600k income MFJ CA, above §461(l) cap, bonus variation.
+      Model upgraded to bracket-by-bracket savings (2026 fed + CA schedules);
+      blended federal rate on a capped loss is ~28.7%, not 37%.
+- [ ] Confirm trust line mechanics (draw size, interest-only vs amortizing). ← ASKED
 - [ ] Decide market scope (likely: drop Monterey for STR purposes).
 - [ ] Replace placeholder ADR/occupancy with AirDNA/Rabbu comps per zip.
 - [ ] Get insurance quotes for representative coastal properties.

@@ -38,8 +38,8 @@ hoa_annual = 0
 permits_licenses_annual = 1_200
 
 [tax]
-federal_marginal_rate = 0.37
-ca_marginal_rate = 0.103
+# ~$600k household income, MFJ, minus $32.2k standard deduction
+household_taxable_income = 568_000
 cost_seg_reclass_pct = 0.28
 months_in_service_year1 = 6
 personal_use_days = 14

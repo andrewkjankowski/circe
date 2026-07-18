@@ -76,8 +76,33 @@ primary purpose.
 ### 6. California does not conform
 CA disallows bonus depreciation and has its own depreciation schedules. The Year-1 loss
 for CA purposes is much smaller. **Tax savings in the model = federal savings (big) + CA
-savings (small)**. At a ~37% federal marginal rate + ~9.3–12.3% CA, only the federal side
-sees the bonus-depreciation boost. Don't double count.
+savings (small)**. Only the federal side sees the bonus-depreciation boost. Don't double
+count.
+
+### 7. The deduction is worth a *blended* rate, not the top marginal rate
+Our profile: ~$600k household income, MFJ (~$568k taxable after the standard
+deduction). A large STR loss deducts bracket-by-bracket on the way down:
+
+| Slice of the loss | Offsets income in bracket | Federal rate |
+|---|---|---|
+| first ~$56k | $568k → $512k | 35% |
+| next ~$109k | $512k → $404k | 32% |
+| everything below $404k | — | 24% |
+
+So a $317k loss (the §461(l) cap) saves ~$91k federal — a **28.7% blended rate**, not
+37%. Two big implications:
+
+1. **Loss dollars below ~$404k of remaining income are only worth 24 cents** federal.
+   The marginal value of a bigger property (bigger loss) falls off a cliff well before
+   the §461(l) cap — another point for the cheaper property.
+2. **Timing matters**: Alyssa's bonus years raise taxable income, which raises the
+   blended rate on the same loss. If a big-bonus year is foreseeable, placing the
+   property in service (or timing the cost-seg election) in that year is worth real
+   money — roughly +$3.2k of federal savings per +$10k of income above $512k
+   (35% vs 32% band), and more if it pushes past $768.7k into 37% territory.
+
+The model computes savings from actual 2026 federal MFJ brackets (Rev. Proc. 2025-32)
+and CA Schedule Y brackets rather than a flat marginal rate.
 
 ## Second-order items
 

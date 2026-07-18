@@ -14,16 +14,18 @@ correct it.
 - **Financing (was Q6):** trust line of credit (>$1M available) at prime + 1% (7.75%
   currently), assumed interest-only, funding cash-to-close; investment mortgage for the
   rest. Encoded as `trust_line_amount` / `trust_line_rate` per scenario.
+- **Tax profile (was Q1):** ~$600k household income, MFJ, CA; income comfortably above
+  the §461(l) cap; some year-to-year variation from Alyssa's bonus. Model now computes
+  savings from actual 2026 federal + CA brackets against $568k taxable income
+  (`household_taxable_income`). Key consequence: the blended federal rate on a $317k
+  loss is **~28.7%, not 37%** — see docs/strategy.md §7. Bonus-year timing noted as a
+  planning lever.
 
 ## A. Tax profile (drives the entire break-even math)
 
-1. **What is your combined marginal tax rate?** Federal bracket (model assumes 37%) and
-   California bracket (model assumes 10.3%). Also: filing MFJ? Any AMT exposure?
-2. **How much W-2/active income are you sheltering?** The §461(l) excess-business-loss
-   cap (~$317k MFJ in 2026) already binds in every example scenario at these price
-   points. If your income is such that a $317k deduction saves less than modeled, or you
-   want to stay under the cap, that changes the optimal purchase price — a *cheaper*
-   property can capture nearly the same Year-1 savings.
+1. ~~Combined marginal tax rate / income level / filing status?~~ **Answered** — see
+   "Answered so far" above.
+2. ~~Income vs §461(l) cap?~~ **Answered** — above the cap.
 3. **Does either spouse have (or want) Real Estate Professional Status?** Not required
    for this strategy, but it changes the fallback options if the 7-day test ever fails.
 4. **Who is your CPA and have they run STR-loophole returns before?** Their positions

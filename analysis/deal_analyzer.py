@@ -26,6 +26,43 @@ BONUS_DEPRECIATION_RATE = 1.00     # OBBBA: permanent 100% for property placed i
 EXCESS_BUSINESS_LOSS_CAP_MFJ = 317_000  # §461(l), 2026 MFJ (indexed annually)
 DEFAULT_BUILDING_RECOVERY_YEARS = 39    # conservative: avg stay <=7d -> nonresidential
 
+# 2026 federal MFJ brackets (Rev. Proc. 2025-32): (upper bound, rate)
+FEDERAL_BRACKETS_MFJ = [
+    (24_800, 0.10), (100_800, 0.12), (211_400, 0.22), (403_550, 0.24),
+    (512_450, 0.32), (768_700, 0.35), (float("inf"), 0.37),
+]
+# CA MFJ Schedule Y (2025 FTB schedules; 2026 indexation pending)
+CA_BRACKETS_MFJ = [
+    (22_158, 0.01), (52_528, 0.02), (82_904, 0.04), (115_084, 0.06),
+    (145_448, 0.08), (742_958, 0.093), (891_542, 0.103),
+    (1_485_906, 0.113), (float("inf"), 0.123),
+]
+# CA Mental Health Services Tax: +1% on taxable income over $1M (doesn't double MFJ)
+CA_MHST_THRESHOLD = 1_000_000
+
+
+def tax_from_brackets(taxable: float, brackets: list[tuple[float, float]]) -> float:
+    taxable = max(taxable, 0.0)
+    tax = 0.0
+    lower = 0.0
+    for upper, rate in brackets:
+        if taxable <= lower:
+            break
+        tax += (min(taxable, upper) - lower) * rate
+        lower = upper
+    return tax
+
+
+def federal_tax(taxable: float) -> float:
+    return tax_from_brackets(taxable, FEDERAL_BRACKETS_MFJ)
+
+
+def ca_tax(taxable: float) -> float:
+    t = tax_from_brackets(taxable, CA_BRACKETS_MFJ)
+    if taxable > CA_MHST_THRESHOLD:
+        t += (taxable - CA_MHST_THRESHOLD) * 0.01
+    return t
+
 
 @dataclass
 class Scenario:
@@ -70,8 +107,10 @@ class Scenario:
     other_annual: float = 0.0
 
     # --- tax profile ---
-    federal_marginal_rate: float = 0.37
-    ca_marginal_rate: float = 0.093
+    # Household taxable income BEFORE the STR loss (income minus deductions).
+    # Savings are computed bracket-by-bracket: a big deduction reaches down into
+    # lower brackets, so the effective rate is blended, not the top marginal rate.
+    household_taxable_income: float = 568_000.0   # ~$600k income - $32.2k std ded
     cost_seg_reclass_pct: float = 0.28  # share of improvement basis moved to 5/7/15-yr
     building_recovery_years: float = DEFAULT_BUILDING_RECOVERY_YEARS
     months_in_service_year1: int = 6    # months from placed-in-service to Dec 31
@@ -231,7 +270,9 @@ def analyze(s: Scenario) -> Result:
         EXCESS_BUSINESS_LOSS_CAP_MFJ / 2
     r.loss_allowed_year1 = min(r.taxable_loss_year1, cap)
     r.ebl_carryforward = max(r.taxable_loss_year1 - cap, 0.0)
-    r.federal_tax_savings_year1 = r.loss_allowed_year1 * s.federal_marginal_rate
+    income = s.household_taxable_income
+    r.federal_tax_savings_year1 = (federal_tax(income)
+                                   - federal_tax(income - r.loss_allowed_year1))
 
     # --- California: no bonus depreciation; straight-line only ---
     ca_depreciation_year1 = ((r.improvement_basis / s.building_recovery_years)
@@ -241,15 +282,21 @@ def analyze(s: Scenario) -> Result:
     ca_taxable_year1 = (r.noi_year1 - r.year1_interest - ca_depreciation_year1
                         - s.cost_seg_study_cost)
     ca_loss = -ca_taxable_year1 if ca_taxable_year1 < 0 else 0.0
-    r.ca_tax_savings_year1 = ca_loss * s.ca_marginal_rate
+    r.ca_tax_savings_year1 = ca_tax(income) - ca_tax(income - ca_loss)
     r.total_tax_savings_year1 = r.federal_tax_savings_year1 + r.ca_tax_savings_year1
 
-    # --- stabilized (year 2+): bonus is gone; SL building only ---
-    # use year-1 interest as a close approximation for early years
-    taxable_stab = r.noi_stabilized - r.year1_interest - r.sl_depreciation_full_year
+    # --- stabilized (year 2+): federal bonus is gone (building SL only);
+    # CA keeps depreciating everything straight-line, so CA depreciation is larger.
+    # Year-1 interest approximates early-year interest.
+    fed_taxable_stab = (r.noi_stabilized - r.year1_interest
+                        - r.sl_depreciation_full_year)
+    ca_depr_stab = r.improvement_basis / s.building_recovery_years \
+        + s.furnishing_budget / 7
+    ca_taxable_stab = r.noi_stabilized - r.year1_interest - ca_depr_stab
     # positive savings if taxable loss; negative (tax owed) if taxable income
-    r.tax_savings_stabilized = -taxable_stab * (s.federal_marginal_rate
-                                                + s.ca_marginal_rate)
+    r.tax_savings_stabilized = (
+        federal_tax(income) - federal_tax(income + fed_taxable_stab)
+        + ca_tax(income) - ca_tax(income + ca_taxable_stab))
 
     # --- compliance flags (hard fails suspend the loss -> no tax savings) ---
     if s.avg_stay_nights > 7:
@@ -313,13 +360,13 @@ OPERATIONS                          Year 1        Stabilized
   Debt service                {money(-r.annual_debt_service):>14} {money(-r.annual_debt_service):>14}
   PRE-TAX CASHFLOW            {money(r.pretax_cashflow_year1):>14} {money(r.pretax_cashflow_stabilized):>14}
 
-YEAR-1 TAX (federal bonus depreciation)
+YEAR-1 TAX (vs household taxable income {money(s.household_taxable_income)}, MFJ brackets)
   Bonus depreciation (cost-seg + furnishings)  {money(r.bonus_depreciation):>14}
   Straight-line depreciation (yr 1)            {money(r.sl_depreciation_year1):>14}
   Year-1 taxable loss                          {money(r.taxable_loss_year1):>14}
   Loss usable this year (§461(l) cap)          {money(r.loss_allowed_year1):>14}
-  Federal tax savings @ {s.federal_marginal_rate:.0%}                     {money(r.federal_tax_savings_year1):>14}
-  CA tax savings @ {s.ca_marginal_rate:.1%} (no bonus conformity)  {money(r.ca_tax_savings_year1):>14}
+  Federal tax savings (blended {r.federal_tax_savings_year1 / r.loss_allowed_year1 if r.loss_allowed_year1 else 0:.1%})        {money(r.federal_tax_savings_year1):>14}
+  CA tax savings (no bonus conformity)         {money(r.ca_tax_savings_year1):>14}
   TOTAL YEAR-1 TAX SAVINGS                     {money(r.total_tax_savings_year1):>14}
 
 VERDICT
